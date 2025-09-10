@@ -4,90 +4,18 @@ const SPOTIFY_CLIENT_SECRET = '9f21f9d8bef14948b07f02e5e826691c'; // 실제 사�
 
 // 기본 검색 결과 데이터 (IU 곡들)
 const defaultResults = [
-    {
-        id: "1",
-        title: "Never Ending Story",
-        artist: "IU",
-        albumArt: "https://via.placeholder.com/120x120/1F2937/FFFFFF?text=NE",
-        spotify: true
-    },
-    {
-        id: "2", 
-        title: "Through the Night",
-        artist: "IU",
-        albumArt: "https://via.placeholder.com/120x120/374151/FFFFFF?text=TTN",
-        spotify: true
-    },
-    {
-        id: "3",
-        title: "Twenty-three",
-        artist: "IU", 
-        albumArt: "https://via.placeholder.com/120x120/EC4899/FFFFFF?text=23",
-        spotify: true
-    },
-    {
-        id: "4",
-        title: "My sea",
-        artist: "IU",
-        albumArt: "https://via.placeholder.com/120x120/06B6D4/FFFFFF?text=MS",
-        spotify: true
-    },
-    {
-        id: "5",
-        title: "Celebrity",
-        artist: "IU",
-        albumArt: "https://via.placeholder.com/120x120/F59E0B/FFFFFF?text=CE",
-        spotify: true
-    },
-    {
-        id: "6",
-        title: "Love wins all",
-        artist: "IU",
-        albumArt: "https://via.placeholder.com/120x120/EF4444/FFFFFF?text=LWA",
-        spotify: true
-    },
-    {
-        id: "7",
-        title: "Drama",
-        artist: "IU",
-        albumArt: "https://via.placeholder.com/120x120/8B5CF6/FFFFFF?text=DR",
-        spotify: true
-    },
-    {
-        id: "8",
-        title: "Meaning of you",
-        artist: "IU, Kim Chang-Wan",
-        albumArt: "https://via.placeholder.com/120x120/10B981/FFFFFF?text=MOY",
-        spotify: true
-    },
-    {
-        id: "9",
-        title: "strawberry moon",
-        artist: "IU",
-        albumArt: "https://via.placeholder.com/120x120/F472B6/FFFFFF?text=SM",
-        spotify: true
-    },
-    {
-        id: "10",
-        title: "Square's dream",
-        artist: "IU",
-        albumArt: "https://via.placeholder.com/120x120/6366F1/FFFFFF?text=SD",
-        spotify: true
-    },
-    {
-        id: "11",
-        title: "Blueming",
-        artist: "IU",
-        albumArt: "https://via.placeholder.com/120x120/3B82F6/FFFFFF?text=BM",
-        spotify: true
-    },
-    {
-        id: "12",
-        title: "eight(Prod.&Feat. SUGA of BTS)",
-        artist: "IU, SUGA",
-        albumArt: "https://via.placeholder.com/120x120/DC2626/FFFFFF?text=8",
-        spotify: true
-    }
+    { id: "1",  title: "Never Ending Story", artist: "IU", albumArt: "https://via.placeholder.com/120x120/1F2937/FFFFFF?text=NE",  spotify: true },
+    { id: "2",  title: "Through the Night",  artist: "IU", albumArt: "https://via.placeholder.com/120x120/374151/FFFFFF?text=TTN", spotify: true },
+    { id: "3",  title: "Twenty-three",       artist: "IU", albumArt: "https://via.placeholder.com/120x120/EC4899/FFFFFF?text=23",   spotify: true },
+    { id: "4",  title: "My sea",             artist: "IU", albumArt: "https://via.placeholder.com/120x120/06B6D4/FFFFFF?text=MS",   spotify: true },
+    { id: "5",  title: "Celebrity",          artist: "IU", albumArt: "https://via.placeholder.com/120x120/F59E0B/FFFFFF?text=CE",   spotify: true },
+    { id: "6",  title: "Love wins all",      artist: "IU", albumArt: "https://via.placeholder.com/120x120/EF4444/FFFFFF?text=LWA",  spotify: true },
+    { id: "7",  title: "Drama",              artist: "IU", albumArt: "https://via.placeholder.com/120x120/8B5CF6/FFFFFF?text=DR",   spotify: true },
+    { id: "8",  title: "Meaning of you",     artist: "IU, Kim Chang-Wan", albumArt: "https://via.placeholder.com/120x120/10B981/FFFFFF?text=MOY", spotify: true },
+    { id: "9",  title: "strawberry moon",    artist: "IU", albumArt: "https://via.placeholder.com/120x120/F472B6/FFFFFF?text=SM",   spotify: true },
+    { id: "10", title: "Square's dream",     artist: "IU", albumArt: "https://via.placeholder.com/120x120/6366F1/FFFFFF?text=SD",   spotify: true },
+    { id: "11", title: "Blueming",           artist: "IU", albumArt: "https://via.placeholder.com/120x120/3B82F6/FFFFFF?text=BM",   spotify: true },
+    { id: "12", title: "eight(Prod.&Feat. SUGA of BTS)", artist: "IU, SUGA", albumArt: "https://via.placeholder.com/120x120/DC2626/FFFFFF?text=8", spotify: true }
 ];
 
 let spotifyResults = [...defaultResults];
@@ -123,13 +51,28 @@ let uploadedImage = null;
 
 // 초기화
 document.addEventListener('DOMContentLoaded', function() {
+    // 이전 세션에서 저장된 커버 복원
+    const savedCover = localStorage.getItem('customCoverUrl');
+    if (savedCover) {
+        uploadedImage = savedCover;
+        playerAlbumArt.src = savedCover;
+    }
+
     setupEventListeners();
     // 초기에는 빈 결과로 설정
     spotifyResults = [];
     renderSearchResults();
     updatePlayerInfo();
     updateChannelInfo(); // 초기 채널 정보 설정
-    applyCardColor(); // 초기 카드 색상 설정
+    applyCardColor();    // 초기 카드 색상 설정
+
+    // 이미지 로드 실패 시 앨범아트로 폴백
+    playerAlbumArt.onerror = () => {
+        const currentSong = spotifyResults[currentSongIndex];
+        if (currentSong && currentSong.albumArt) {
+            playerAlbumArt.src = currentSong.albumArt;
+        }
+    };
 });
 
 // 검색 결과 렌더링
@@ -165,7 +108,7 @@ function renderSearchResults() {
             } else {
                 // 일반 클릭은 플레이어에 반영
                 currentSongIndex = index;
-                updatePlayerInfo();
+                updatePlayerInfo(); // 업로드 이미지가 있으면 유지
                 playSong();
             }
         });
@@ -235,10 +178,22 @@ function setupEventListeners() {
 
 // 플레이어 정보 업데이트
 function updatePlayerInfo() {
-    const currentSong = spotifyResults[currentSongIndex];
+    const currentSong = spotifyResults[currentSongIndex] || {
+        title: '',
+        artist: '',
+        albumArt: 'https://via.placeholder.com/120x120/8B5CF6/FFFFFF?text=🎵'
+    };
+
+    // 제목 - 아티스트 표시
     songTitle.textContent = `${currentSong.title} - ${currentSong.artist}`;
-    updateChannelInfo(); // 채널 정보 업데이트 함수 호출
-    playerAlbumArt.src = currentSong.albumArt;
+    updateChannelInfo(); // 채널 정보 업데이트
+
+    // ⚡ 핵심 변경: 업로드한 이미지가 있으면 그걸 유지, 없을 때만 앨범아트로
+    if (uploadedImage) {
+        playerAlbumArt.src = uploadedImage;
+    } else {
+        playerAlbumArt.src = currentSong.albumArt;
+    }
 }
 
 // 재생/일시정지 토글
@@ -247,8 +202,7 @@ function togglePlay() {
     playBtn.textContent = isPlaying ? '⏸' : '▶';
     
     if (isPlaying) {
-        // 실제 재생 로직은 여기에 구현
-        console.log('재생 시작:', spotifyResults[currentSongIndex].title);
+        console.log('재생 시작:', spotifyResults[currentSongIndex]?.title);
     } else {
         console.log('일시정지');
     }
@@ -276,7 +230,7 @@ function playNext() {
 function playSong() {
     isPlaying = true;
     playBtn.textContent = '⏸';
-    console.log('재생:', spotifyResults[currentSongIndex].title);
+    console.log('재생:', spotifyResults[currentSongIndex]?.title);
 }
 
 // 파일 업로드 처리
@@ -285,32 +239,46 @@ function handleFileUpload(event) {
     if (file) {
         fileName.textContent = file.name;
         
-        // FileReader를 사용하여 이미지를 읽고 플레이어에 적용
         const reader = new FileReader();
         reader.onload = function(e) {
             uploadedImage = e.target.result;
             playerAlbumArt.src = uploadedImage;
+
+            // 새로고침 유지용 저장
+            localStorage.setItem('customCoverUrl', uploadedImage);
+
             console.log('이미지 업로드됨:', file.name);
         };
         reader.readAsDataURL(file);
     }
 }
 
-// 커스텀 커버 적용
+// 커스텀 커버 적용 (URL)
 function applyCustomCover() {
-    const coverUrl = document.getElementById('coverUrl').value;
+    const coverUrl = document.getElementById('coverUrl').value.trim();
     if (coverUrl) {
-        playerAlbumArt.src = coverUrl;
         uploadedImage = coverUrl;
+        playerAlbumArt.src = coverUrl;
+
+        // 새로고침 유지용 저장
+        localStorage.setItem('customCoverUrl', coverUrl);
+
         console.log('커버 적용:', coverUrl);
     }
 }
 
-// 원래 썸네일로 복원
+// 원래 썸네일로 복원 (업로드 이미지 해제)
 function resetToOriginalCover() {
     const currentSong = spotifyResults[currentSongIndex];
-    playerAlbumArt.src = currentSong.albumArt;
     uploadedImage = null;
+
+    // 저장 제거
+    localStorage.removeItem('customCoverUrl');
+
+    if (currentSong && currentSong.albumArt) {
+        playerAlbumArt.src = currentSong.albumArt;
+    }
+
     console.log('원래 썸네일로 복원');
 }
 
@@ -364,13 +332,7 @@ async function loadHot100() {
             }
             
             // 방법 2: 한국 차트 플레이리스트 검색
-            const playlistQueries = [
-                'korea top 50',
-                'korean hits',
-                'k-pop top',
-                'korean music',
-                'korea viral'
-            ];
+            const playlistQueries = ['korea top 50', 'korean hits', 'k-pop top', 'korean music', 'korea viral'];
             
             for (const query of playlistQueries) {
                 try {
@@ -384,7 +346,6 @@ async function loadHot100() {
                     if (response.ok) {
                         const data = await response.json();
                         if (data.playlists && data.playlists.items.length > 0) {
-                            // 가장 관련성 높은 플레이리스트 선택
                             const playlist = data.playlists.items[0];
                             console.log('한국 플레이리스트 발견:', playlist.name);
                             await loadPlaylistTracks(playlist.id, token);
@@ -413,11 +374,10 @@ async function loadHot100() {
 // 한국 아티스트 차트 로드
 async function loadKoreanCharts(token) {
     try {
-        // 한국 인기 아티스트들로 검색 (더 많은 아티스트로 확장)
         const koreanArtists = ['BTS', 'NewJeans', 'LE SSERAFIM', 'aespa', 'IVE', 'ITZY', 'NCT', 'Stray Kids', 'SEVENTEEN', 'TWICE', 'BLACKPINK', '(G)I-DLE', 'Red Velvet', 'IU', '태연'];
         const allTracks = [];
         
-        for (const artist of koreanArtists.slice(0, 5)) { // 상위 5개 아티스트 검색
+        for (const artist of koreanArtists.slice(0, 5)) {
             try {
                 const response = await fetch(`https://api.spotify.com/v1/search?q=${encodeURIComponent(artist)}&type=track&limit=4&market=KR`, {
                     headers: {
@@ -447,7 +407,7 @@ async function loadKoreanCharts(token) {
         }
         
         if (allTracks.length > 0) {
-            spotifyResults = allTracks.slice(0, 20); // 최대 20개
+            spotifyResults = allTracks.slice(0, 20);
             renderSearchResults();
             console.log('한국 아티스트 차트 로드 완료:', allTracks.length, '곡');
             return;
@@ -468,7 +428,6 @@ async function forceUpdateKoreanCharts() {
         const token = await getSpotifyToken();
         
         if (token) {
-            // 최신 한국 트랙 검색
             const response = await fetch('https://api.spotify.com/v1/search?q=year:2024&type=track&limit=20&market=KR', {
                 headers: {
                     'Authorization': 'Bearer ' + token,
@@ -545,26 +504,26 @@ async function loadPlaylistTracks(playlistId, token) {
 // 데모 한국 차트 데이터 로드
 function loadDemoKoreanCharts() {
     const koreanCharts = [
-        { id: "kr1", title: "Dynamite", artist: "BTS", albumArt: "https://via.placeholder.com/120x120/54A0FF/FFFFFF?text=DY" },
-        { id: "kr2", title: "Butter", artist: "BTS", albumArt: "https://via.placeholder.com/120x120/FD79A8/FFFFFF?text=BT" },
-        { id: "kr3", title: "Permission to Dance", artist: "BTS", albumArt: "https://via.placeholder.com/120x120/FF6B6B/FFFFFF?text=PTD" },
-        { id: "kr4", title: "Hype Boy", artist: "NewJeans", albumArt: "https://via.placeholder.com/120x120/4ECDC4/FFFFFF?text=HB" },
-        { id: "kr5", title: "Attention", artist: "NewJeans", albumArt: "https://via.placeholder.com/120x120/45B7D1/FFFFFF?text=AT" },
-        { id: "kr6", title: "Cookie", artist: "NewJeans", albumArt: "https://via.placeholder.com/120x120/96CEB4/FFFFFF?text=CO" },
-        { id: "kr7", title: "FEARLESS", artist: "LE SSERAFIM", albumArt: "https://via.placeholder.com/120x120/FFEAA7/FFFFFF?text=FL" },
-        { id: "kr8", title: "ANTIFRAGILE", artist: "LE SSERAFIM", albumArt: "https://via.placeholder.com/120x120/DDA0DD/FFFFFF?text=AF" },
-        { id: "kr9", title: "Next Level", artist: "aespa", albumArt: "https://via.placeholder.com/120x120/98D8C8/FFFFFF?text=NL" },
-        { id: "kr10", title: "Savage", artist: "aespa", albumArt: "https://via.placeholder.com/120x120/F7DC6F/FFFFFF?text=SV" },
-        { id: "kr11", title: "ELEVEN", artist: "IVE", albumArt: "https://via.placeholder.com/120x120/FF9FF3/FFFFFF?text=EL" },
-        { id: "kr12", title: "LOVE DIVE", artist: "IVE", albumArt: "https://via.placeholder.com/120x120/5F27CD/FFFFFF?text=LD" },
-        { id: "kr13", title: "WANNABE", artist: "ITZY", albumArt: "https://via.placeholder.com/120x120/00D2D3/FFFFFF?text=WB" },
-        { id: "kr14", title: "LOCO", artist: "ITZY", albumArt: "https://via.placeholder.com/120x120/FF6348/FFFFFF?text=LC" },
-        { id: "kr15", title: "Kick It", artist: "NCT 127", albumArt: "https://via.placeholder.com/120x120/2ED573/FFFFFF?text=KI" },
-        { id: "kr16", title: "Sticker", artist: "NCT 127", albumArt: "https://via.placeholder.com/120x120/FFA502/FFFFFF?text=ST" },
+        { id: "kr1",  title: "Dynamite", artist: "BTS",        albumArt: "https://via.placeholder.com/120x120/54A0FF/FFFFFF?text=DY" },
+        { id: "kr2",  title: "Butter",   artist: "BTS",        albumArt: "https://via.placeholder.com/120x120/FD79A8/FFFFFF?text=BT" },
+        { id: "kr3",  title: "Permission to Dance", artist: "BTS", albumArt: "https://via.placeholder.com/120x120/FF6B6B/FFFFFF?text=PTD" },
+        { id: "kr4",  title: "Hype Boy", artist: "NewJeans",   albumArt: "https://via.placeholder.com/120x120/4ECDC4/FFFFFF?text=HB" },
+        { id: "kr5",  title: "Attention",artist: "NewJeans",   albumArt: "https://via.placeholder.com/120x120/45B7D1/FFFFFF?text=AT" },
+        { id: "kr6",  title: "Cookie",   artist: "NewJeans",   albumArt: "https://via.placeholder.com/120x120/96CEB4/FFFFFF?text=CO" },
+        { id: "kr7",  title: "FEARLESS", artist: "LE SSERAFIM",albumArt: "https://via.placeholder.com/120x120/FFEAA7/FFFFFF?text=FL" },
+        { id: "kr8",  title: "ANTIFRAGILE", artist: "LE SSERAFIM", albumArt: "https://via.placeholder.com/120x120/DDA0DD/FFFFFF?text=AF" },
+        { id: "kr9",  title: "Next Level", artist: "aespa",    albumArt: "https://via.placeholder.com/120x120/98D8C8/FFFFFF?text=NL" },
+        { id: "kr10", title: "Savage",     artist: "aespa",    albumArt: "https://via.placeholder.com/120x120/F7DC6F/FFFFFF?text=SV" },
+        { id: "kr11", title: "ELEVEN",     artist: "IVE",      albumArt: "https://via.placeholder.com/120x120/FF9FF3/FFFFFF?text=EL" },
+        { id: "kr12", title: "LOVE DIVE",  artist: "IVE",      albumArt: "https://via.placeholder.com/120x120/5F27CD/FFFFFF?text=LD" },
+        { id: "kr13", title: "WANNABE",    artist: "ITZY",     albumArt: "https://via.placeholder.com/120x120/00D2D3/FFFFFF?text=WB" },
+        { id: "kr14", title: "LOCO",       artist: "ITZY",     albumArt: "https://via.placeholder.com/120x120/FF6348/FFFFFF?text=LC" },
+        { id: "kr15", title: "Kick It",    artist: "NCT 127",  albumArt: "https://via.placeholder.com/120x120/2ED573/FFFFFF?text=KI" },
+        { id: "kr16", title: "Sticker",    artist: "NCT 127",  albumArt: "https://via.placeholder.com/120x120/FFA502/FFFFFF?text=ST" },
         { id: "kr17", title: "God's Menu", artist: "Stray Kids", albumArt: "https://via.placeholder.com/120x120/FF3838/FFFFFF?text=GM" },
         { id: "kr18", title: "Thunderous", artist: "Stray Kids", albumArt: "https://via.placeholder.com/120x120/FF9F43/FFFFFF?text=TH" },
         { id: "kr19", title: "Left & Right", artist: "SEVENTEEN", albumArt: "https://via.placeholder.com/120x120/6C5CE7/FFFFFF?text=LR" },
-        { id: "kr20", title: "HOT", artist: "SEVENTEEN", albumArt: "https://via.placeholder.com/120x120/A29BFE/FFFFFF?text=HT" }
+        { id: "kr20", title: "HOT",        artist: "SEVENTEEN", albumArt: "https://via.placeholder.com/120x120/A29BFE/FFFFFF?text=HT" }
     ];
     
     spotifyResults = koreanCharts;
@@ -575,7 +534,7 @@ function loadDemoKoreanCharts() {
 // 카드 색상 적용
 function applyCardColor() {
     const color = cardColorInput.value;
-    const darkerColor = adjustBrightness(color, -20); // 더 어두운 색상 생성
+    const darkerColor = adjustBrightness(color, -20);
     
     document.documentElement.style.setProperty('--card-color', color);
     document.documentElement.style.setProperty('--player-card-color', color);
