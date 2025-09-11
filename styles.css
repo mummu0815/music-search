@@ -5,65 +5,11 @@
     --text-color: #333;
     --light-text-color: #666;
     --border-radius: 12px;
-    --player-min-height: 80px;
 }
 
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: var(--primary-bg-color);
-    color: var(--text-color);
-    min-height: 100vh;
-}
-
-header {
-    background: linear-gradient(135deg, var(--player-bg-start), var(--player-bg-end));
-    color: white;
-    padding: 20px 0;
-    text-align: center;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    transition: background 0.5s ease;
-}
-
-main {
-    flex-grow: 1;
-    padding: 20px;
-    max-width: 1200px;
-    margin: 0 auto;
-    width: 100%;
-    padding-bottom: calc(var(--player-min-height) + 150px); /* 플레이어 확장 공간 확보 */
-}
-
-/* 상단 설정 패널 */
-.settings-panel {
-    background-color: white;
-    padding: 15px;
-    border-radius: var(--border-radius);
-    margin-bottom: 20px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.setting-group label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: bold;
-    color: var(--light-text-color);
-}
-
-.card-shape-options { display: flex; gap: 10px; }
-.card-shape-btn {
-    flex: 1;
-    background-color: #e0e0e0;
-    color: var(--text-color);
-    border: 1px solid #ccc;
-    padding: 8px 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: all 0.2s ease;
-}
-.card-shape-btn.active { background-color: #9c27b0; color: white; border-color: #9c27b0; }
+body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: var(--primary-bg-color); color: var(--text-color); }
+header { background: linear-gradient(135deg, var(--player-bg-start), var(--player-bg-end)); color: white; padding: 20px 0; text-align: center; box-shadow: 0 4px 8px rgba(0,0,0,0.2); transition: background 0.5s ease; }
+main { padding: 20px; max-width: 1200px; margin: 0 auto; width: 100%; padding-bottom: 250px; }
 
 /* 검색 섹션 */
 .search-section { display: flex; gap: 10px; margin-bottom: 20px; }
@@ -76,18 +22,9 @@ main {
 .search-results.image-style { grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); }
 .search-results.vertical { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
 
-.song-card {
-    background: white;
-    color: var(--text-color);
-    border: 1px solid #eee;
-    border-radius: var(--border-radius);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-    cursor: pointer;
-    overflow: hidden;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-.song-card:hover { transform: translateY(-5px); box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1); }
-.song-card img { width: 100%; display: block; }
+.song-card { background: white; border: 1px solid #eee; border-radius: var(--border-radius); box-shadow: 0 4px 10px rgba(0,0,0,0.05); cursor: pointer; overflow: hidden; transition: all 0.2s ease; }
+.song-card:hover { transform: translateY(-5px); box-shadow: 0 6px 15px rgba(0,0,0,0.1); }
+.song-card img { width: 100%; display: block; object-fit: cover; }
 .song-card .info { padding: 15px; }
 .song-card .title { font-weight: bold; font-size: 1.1rem; }
 .song-card .artist { color: var(--light-text-color); }
@@ -97,67 +34,38 @@ main {
 .search-results.image-style .song-card { display: flex; padding: 15px; }
 .search-results.image-style .song-card img { width: 100px; height: 100px; margin-right: 20px; border-radius: var(--border-radius); }
 .search-results.vertical .song-card { text-align: center; }
-.search-results.vertical .song-card img { height: 180px; object-fit: cover; }
+.search-results.vertical .song-card img { height: 180px; }
 
 /* 하단 플레이어 '카드' */
-.music-player {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background: linear-gradient(90deg, var(--player-bg-start), var(--player-bg-end));
-    color: white;
-    box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.3);
-    z-index: 1000;
-    padding: 10px 20px;
-    transition: background 0.5s ease;
-}
-
+.music-player { position: fixed; bottom: 0; left: 0; width: 100%; background: linear-gradient(135deg, var(--player-bg-start), var(--player-bg-end)); color: white; box-shadow: 0 -4px 10px rgba(0,0,0,0.3); z-index: 1000; padding: 10px 20px; transition: background 0.5s ease; }
 .player-main-content { display: flex; align-items: center; width: 100%; max-width: 1200px; margin: 0 auto; height: 60px; }
-.player-cover { width: 60px; height: 60px; border-radius: 8px; margin-right: 15px; flex-shrink: 0; }
+.player-cover { width: 60px; height: 60px; border-radius: 8px; margin-right: 15px; flex-shrink: 0; object-fit: cover; }
 .player-info { flex-grow: 1; min-width: 0; }
 .player-title { font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .player-artist { font-size: 0.9rem; color: rgba(255, 255, 255, 0.8); }
 .player-controls { display: flex; align-items: center; gap: 10px; margin: 0 20px; }
-.player-control-btn { background: rgba(255, 255, 255, 0.2); border: none; color: white; width: 40px; height: 40px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; }
+.player-control-btn { background: rgba(255,255,255,0.2); border: none; color: white; width: 40px; height: 40px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; }
 .player-control-btn.main-control { width: 50px; height: 50px; }
 .player-control-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
 .player-waveform { display: flex; align-items: flex-end; height: 30px; gap: 2px; }
 .player-waveform .bar { width: 3px; background-color: white; animation: waveform 1.2s ease-in-out infinite alternate; }
 .player-waveform.paused .bar { animation-play-state: paused; height: 5px !important; }
 @keyframes waveform { 0% { height: 5px; } 100% { height: 30px; } }
 
-.player-settings-toggle { background: none; border: none; color: rgba(255, 255, 255, 0.8); font-size: 1.5rem; cursor: pointer; margin-left: auto; transition: transform 0.3s ease; }
+/* 플레이어 설정 */
+.player-settings-toggle { background: none; border: none; color: rgba(255,255,255,0.8); font-size: 1.5rem; cursor: pointer; margin-left: auto; transition: transform 0.3s ease; }
 .player-settings-toggle.active { transform: rotate(90deg); }
-
-/* 플레이어 설정 영역 */
-.player-settings-content {
-    max-width: 1200px;
-    margin: 0 auto;
-    overflow: hidden;
-    transition: max-height 0.4s ease-in-out, padding-top 0.4s ease-in-out, opacity 0.4s ease-in-out;
-    max-height: 0;
-    opacity: 0;
-    padding-top: 0;
-}
-.player-settings-content.visible {
-    max-height: 200px;
-    opacity: 1;
-    padding-top: 15px;
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.player-setting-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.player-settings-content { max-width: 1200px; margin: 0 auto; overflow: hidden; transition: all 0.4s ease-in-out; max-height: 0; opacity: 0; padding-top: 0; }
+.player-settings-content.visible { max-height: 250px; opacity: 1; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.2); }
+.player-setting-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px 25px; }
 .player-setting-group { display: flex; flex-direction: column; gap: 8px; }
 .player-setting-group label { font-weight: bold; font-size: 0.9rem; }
-.player-setting-group .input-row { display: flex; gap: 10px; }
-.player-setting-group input { width: 100%; }
-.player-setting-group input[type="text"] { background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 8px; border-radius: 5px; }
-.player-setting-group button { background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.5); color: white; padding: 8px 12px; border-radius: 5px; cursor: pointer; }
+.input-row { display: flex; gap: 10px; align-items: center; }
+.player-setting-group input[type="text"] { background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 8px; border-radius: 5px; flex-grow: 1; }
+.player-setting-group button { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.5); color: white; padding: 8px 12px; border-radius: 5px; cursor: pointer; }
 .player-setting-group input[type="color"] { width: 40px; height: 40px; padding: 0; border-radius: 5px; }
-
-@media (max-width: 768px) {
-    .player-waveform, .player-settings-toggle { display: none; } /* 모바일에선 숨김 */
-    .player-setting-grid { grid-template-columns: 1fr; }
-}
+.card-shape-options { gap: 5px; }
+.card-shape-btn { flex: 1; padding: 8px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.3); color: rgba(255,255,255,0.8); }
+.card-shape-btn.active { background: rgba(255,255,255,0.3); color: white; }
+.file-upload-hidden { display: none; }
+.file-upload-label { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.5); padding: 8px 12px; border-radius: 5px; cursor: pointer; white-space: nowrap; }
