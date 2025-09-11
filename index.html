@@ -13,33 +13,21 @@
     </header>
 
     <main>
-        <div class="settings-panel">
-            <div class="setting-group card-shape-settings">
-                <label>검색 결과 모양 선택:</label>
-                <div class="card-shape-options">
-                    <button class="card-shape-btn active" data-shape="default">가로형</button>
-                    <button class="card-shape-btn" data-shape="image-style">박스형</button>
-                    <button class="card-shape-btn" data-shape="vertical">세로형</button>
-                </div>
-            </div>
-        </div>
-
         <div class="search-section">
-            <input type="text" id="searchQuery" placeholder="스포티파이에서 노래/가수 검색 (예: 아이유 밤편지)">
+            <input type="text" id="searchQuery" placeholder="스포티파이에서 노래/가수 검색 (예: 아이유 좋은날)">
             <button id="searchButton">검색</button>
         </div>
 
         <div id="searchResults" class="search-results default-shape">
-            <p class="no-results hidden">검색 결과가 없습니다.</p>
-        </div>
+            </div>
     </main>
 
     <div id="musicPlayer" class="music-player">
         <div class="player-main-content">
             <img id="playerCover" src="https://via.placeholder.com/60" alt="Album Cover" class="player-cover">
             <div class="player-info">
-                <div id="playerTitle" class="player-title">노래 제목</div>
-                <div id="playerArtist" class="player-artist">아티스트</div>
+                <div id="playerTitle" class="player-title">노래를 검색하고 선택해주세요</div>
+                <div id="playerArtist" class="player-artist">채널 이름을 설정해보세요</div>
             </div>
              <div class="player-controls">
                 <button id="previousBtn" class="player-control-btn"><i class="fas fa-step-backward"></i></button>
@@ -47,31 +35,46 @@
                 <button id="nextBtn" class="player-control-btn"><i class="fas fa-step-forward"></i></button>
             </div>
             <div class="player-waveform">
-                <span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span>
+                <span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span>
             </div>
             <button id="playerSettingsToggle" class="player-settings-toggle"><i class="fas fa-cog"></i></button>
         </div>
 
-        <div id="playerSettingsContent" class="player-settings-content hidden">
-             <div class="player-setting-group">
-                <label for="channelNameInput">채널 이름:</label>
-                <input type="text" id="channelNameInput" placeholder="채널 이름을 입력하세요">
-                <button id="saveChannelName">저장</button>
-            </div>
-            <div class="player-setting-group color-settings">
-                <label>카드 색상 변경:</label>
-                <div class="color-inputs">
-                    <input type="color" id="baseColorPicker" value="#8A2BE2" title="기본 색상">
-                    <input type="color" id="accentColorPicker" value="#CCCCFF" title="보조 색상">
-                    <button id="applyCardColors">색상 적용</button>
-                    <button id="resetCardColors">기본 색상</button>
+        <div id="playerSettingsContent" class="player-settings-content">
+            <div class="player-setting-grid">
+                <div class="player-setting-group">
+                    <label for="channelNameInput">채널 이름:</label>
+                    <div class="input-row">
+                        <input type="text" id="channelNameInput" placeholder="채널 이름 입력">
+                        <button id="saveChannelName">저장</button>
+                    </div>
                 </div>
-            </div>
-            <div class="player-setting-group">
-                <label>커버 이미지:</label>
-                <input type="file" id="coverUpload" accept="image/*">
-                <input type="text" id="coverUrlInput" placeholder="또는 이미지 URL 입력">
-                <button id="applyCoverUrl">URL 적용</button>
+                <div class="player-setting-group">
+                    <label>카드 색상 변경:</label>
+                    <div class="input-row">
+                        <input type="color" id="baseColorPicker" title="기본 색상">
+                        <input type="color" id="accentColorPicker" title="보조 색상">
+                        <button id="applyCardColors">적용</button>
+                        <button id="resetCardColors">기본</button>
+                    </div>
+                </div>
+                <div class="player-setting-group">
+                    <label>커버 이미지:</label>
+                    <div class="input-row file-input-row">
+                        <label for="coverUpload" class="file-upload-label">파일 선택</label>
+                        <input type="file" id="coverUpload" accept="image/*" class="file-upload-hidden">
+                        <input type="text" id="coverUrlInput" placeholder="또는 이미지 URL 입력">
+                        <button id="applyCoverUrl">URL 적용</button>
+                    </div>
+                </div>
+                <div class="player-setting-group">
+                    <label>검색 결과 모양:</label>
+                    <div class="input-row card-shape-options">
+                        <button class="card-shape-btn active" data-shape="default">가로형</button>
+                        <button class="card-shape-btn" data-shape="image-style">박스형</button>
+                        <button class="card-shape-btn" data-shape="vertical">세로형</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
