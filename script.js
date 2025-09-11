@@ -1,7 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     // 🚨🚨🚨 중요: 이 곳에 자신의 Spotify API 키를 입력하세요! 🚨🚨🚨
-    // Spotify 개발자 대시보드에서 발급받을 수 있습니다: https://developer.spotify.com/dashboard
     const CLIENT_ID = '3bdf3377e2c24913a0fbf5a9d1fdb3d0';
     const CLIENT_SECRET = '9f21f9d8bef14948b07f02e5e826691c';
 
@@ -15,7 +14,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const playPauseBtn = document.getElementById('playPauseBtn');
     const previousBtn = document.getElementById('previousBtn');
     const nextBtn = document.getElementById('nextBtn');
-    const playerWaveform = document.querySelector('.player-waveform');
     const playerSettingsToggle = document.getElementById('playerSettingsToggle');
     const playerSettingsContent = document.getElementById('playerSettingsContent');
     const channelNameInput = document.getElementById('channelNameInput');
@@ -29,18 +27,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const resetCardColorsBtn = document.getElementById('resetCardColors');
     const cardShapeButtons = document.querySelectorAll('.card-shape-btn');
 
-    // --- 애플리케이션 상태 변수 ---
+    // --- 상태 변수 ---
     let spotifyResults = [];
     let currentSongIndex = -1;
     let isPlaying = false;
     let uploadedImage = localStorage.getItem('customCoverImage') || 'https://via.placeholder.com/60';
+    let channelName = localStorage.getItem('channelName') || '';
     let currentCardShape = localStorage.getItem('cardShape') || 'default';
     let accessToken = null;
 
-    // --- Spotify API 함수 ---
+    // --- Spotify API ---
     async function getAccessToken() {
-        if (CLIENT_ID === 'YOUR_SPOTIFY_CLIENT_ID' || CLIENT_SECRET === 'YOUR_SPOTIFY_CLIENT_SECRET') {
-            console.error("Spotify 클라이언트 ID와 시크릿을 입력해야 합니다.");
+        if (CLIENT_ID === 'YOUR_SPOTIFY_CLIENT_ID') {
             alert("🚨 script.js 파일에 Spotify API 키를 먼저 입력해주세요!");
             return null;
         }
@@ -56,10 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) throw new Error('토큰 발급 실패');
             const data = await response.json();
             return data.access_token;
-        } catch (error) {
-            console.error('Access Token Error:', error);
-            return null;
-        }
+        } catch (error) { return null; }
     }
 
     async function searchSpotify(query) {
@@ -67,15 +62,10 @@ document.addEventListener('DOMContentLoaded', () => {
             accessToken = await getAccessToken();
             if (!accessToken) return generateDemoResults(query);
         }
-
         try {
             const response = await fetch(`https://api.spotify.com/v1/search?q=$0{encodeURIComponent(query)}&type=track&limit=20`, {
                 headers: { 'Authorization': `Bearer ${accessToken}` }
             });
-            if (response.status === 401) { // 토큰 만료 시 재발급
-                accessToken = await getAccessToken();
-                return searchSpotify(query);
-            }
             if (!response.ok) throw new Error('API 검색 실패');
             const data = await response.json();
             return data.tracks.items.map(track => ({
@@ -84,13 +74,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 artist: track.artists.map(a => a.name).join(', '),
                 cover: track.album.images[0]?.url || 'https://via.placeholder.com/150'
             }));
-        } catch (error) {
-            console.error('Search Error:', error);
-            return generateDemoResults(query);
-        }
+        } catch (error) { return generateDemoResults(query); }
     }
 
-    function generateDemoResults(query = "데모") {
+    function generateDemoResults(query) {
         alert("API 호출에 실패하여 데모 데이터를 표시합니다.");
         return Array.from({ length: 10 }, (_, i) => ({
             id: `demo${i+1}`,
@@ -100,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }));
     }
 
-    // --- UI 렌더링 함수 ---
+    // --- UI 렌더링 ---
     function renderSearchResults(results) {
         spotifyResults = results;
         searchResultsDiv.innerHTML = '';
@@ -108,7 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (results.length === 0) {
             searchResultsDiv.innerHTML = `<p>검색 결과가 없습니다.</p>`;
-            updatePlayerControls(false); // 결과 없으면 플레이어 버튼 비활성화
+            updatePlayerControls(false);
             return;
         }
 
@@ -116,61 +103,67 @@ document.addEventListener('DOMContentLoaded', () => {
             const card = document.createElement('div');
             card.className = 'song-card';
             card.dataset.index = index;
+            // 검색 결과 카드는 항상 실제 앨범 커버를 표시
             card.innerHTML = `<img src="${song.cover}" alt="${song.title}"><div class="info"><div class="title">${song.title}</div><div class="artist">${song.artist}</div></div>`;
             searchResultsDiv.appendChild(card);
         });
 
-        // 첫 곡을 플레이어에 기본으로 표시
-        currentSongIndex = 0;
-        updatePlayerInfo();
-        updatePlayerControls(true);
+        playSong(0); // 검색 완료 후 첫 곡 자동 재생
     }
 
     function updatePlayerInfo() {
+        if (currentSongIndex < 0 || currentSongIndex >= spotifyResults.length) return;
+        
         const song = spotifyResults[currentSongIndex];
-        if (!song) return;
+        
+        // 1. 커버 이미지: 업로드된 이미지로 "고정"
         playerCover.src = uploadedImage;
-        playerTitle.textContent = song.title;
-        playerArtist.textContent = song.artist;
+
+        // 2. 제목 형식: "제목 - 아티스트"
+        playerTitle.textContent = `${song.title} - ${song.artist}`;
+
+        // 3. 아티스트/채널 이름: 저장된 채널 이름이 있으면 그것으로 표시
+        playerArtist.textContent = channelName || song.artist; // 채널 이름이 없으면 원래 아티스트 표시
     }
     
     function updatePlayerControls(isEnabled) {
-        playPauseBtn.disabled = !isEnabled;
-        nextBtn.disabled = !isEnabled;
-        previousBtn.disabled = !isEnabled;
+        [playPauseBtn, nextBtn, previousBtn].forEach(btn => btn.disabled = !isEnabled);
     }
 
-    // --- 플레이어 제어 함수 ---
+    // --- 플레이어 제어 ---
     function playSong(index) {
         currentSongIndex = index;
         updatePlayerInfo();
         if (!isPlaying) {
             isPlaying = true;
             playPauseBtn.innerHTML = `<i class="fas fa-pause"></i>`;
-            playerWaveform.classList.remove('paused');
         }
+        updatePlayerControls(true);
     }
 
     function togglePlayPause() {
         if (currentSongIndex === -1) return;
         isPlaying = !isPlaying;
         playPauseBtn.innerHTML = `<i class="fas ${isPlaying ? 'fa-pause' : 'fa-play'}"></i>`;
-        playerWaveform.classList.toggle('paused', !isPlaying);
     }
 
     function playNext() {
         if (spotifyResults.length === 0) return;
-        const nextIndex = (currentSongIndex + 1) % spotifyResults.length;
-        playSong(nextIndex);
+        playSong((currentSongIndex + 1) % spotifyResults.length);
     }
 
     function playPrevious() {
         if (spotifyResults.length === 0) return;
-        const prevIndex = (currentSongIndex - 1 + spotifyResults.length) % spotifyResults.length;
-        playSong(prevIndex);
+        playSong((currentSongIndex - 1 + spotifyResults.length) % spotifyResults.length);
+    }
+    
+    function handleImageUpload(imageSrc) {
+        uploadedImage = imageSrc;
+        localStorage.setItem('customCoverImage', uploadedImage);
+        playerCover.src = uploadedImage; // 즉시 플레이어 커버에 반영
     }
 
-    // --- 이벤트 리스너 설정 ---
+    // --- 이벤트 리스너 ---
     function setupEventListeners() {
         searchButton.addEventListener('click', async () => {
             const query = searchQueryInput.value.trim();
@@ -194,84 +187,72 @@ document.addEventListener('DOMContentLoaded', () => {
             playerSettingsToggle.classList.toggle('active');
             playerSettingsContent.classList.toggle('visible');
         });
-
-        // 설정 기능들
+        
+        // 채널 이름 저장
         saveChannelNameBtn.addEventListener('click', () => {
-            localStorage.setItem('channelName', channelNameInput.value);
-            alert('채널 이름 저장됨');
+            channelName = channelNameInput.value.trim();
+            localStorage.setItem('channelName', channelName);
+            updatePlayerInfo(); // 즉시 플레이어에 반영
+            alert('채널 이름이 저장되었습니다.');
+        });
+        
+        // 커버 이미지 업로드 (파일/URL)
+        coverUploadInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => handleImageUpload(event.target.result);
+                reader.readAsDataURL(file);
+            }
+        });
+        applyCoverUrlBtn.addEventListener('click', () => {
+            if (coverUrlInput.value.trim()) handleImageUpload(coverUrlInput.value.trim());
         });
 
+        // 카드(플레이어) 색상 변경
         applyCardColorsBtn.addEventListener('click', () => {
             document.documentElement.style.setProperty('--player-bg-start', baseColorPicker.value);
             document.documentElement.style.setProperty('--player-bg-end', accentColorPicker.value);
             localStorage.setItem('playerBaseColor', baseColorPicker.value);
             localStorage.setItem('playerAccentColor', accentColorPicker.value);
         });
-        
         resetCardColorsBtn.addEventListener('click', () => {
             const defaultBase = '#6a1b9a', defaultAccent = '#4a148c';
             document.documentElement.style.setProperty('--player-bg-start', defaultBase);
             document.documentElement.style.setProperty('--player-bg-end', defaultAccent);
-            baseColorPicker.value = defaultBase;
-            accentColorPicker.value = defaultAccent;
-            localStorage.removeItem('playerBaseColor');
-            localStorage.removeItem('playerAccentColor');
+            baseColorPicker.value = defaultBase; accentColorPicker.value = defaultAccent;
+            localStorage.removeItem('playerBaseColor'); localStorage.removeItem('playerAccentColor');
         });
 
-        coverUploadInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    uploadedImage = event.target.result;
-                    localStorage.setItem('customCoverImage', uploadedImage);
-                    playerCover.src = uploadedImage;
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        applyCoverUrlBtn.addEventListener('click', () => {
-            const url = coverUrlInput.value.trim();
-            if (url) {
-                uploadedImage = url;
-                localStorage.setItem('customCoverImage', uploadedImage);
-                playerCover.src = uploadedImage;
-            }
-        });
-
+        // 검색 결과 모양 변경
         cardShapeButtons.forEach(button => {
             button.addEventListener('click', () => {
                 cardShapeButtons.forEach(btn => btn.classList.remove('active'));
                 button.classList.add('active');
                 currentCardShape = button.dataset.shape;
                 localStorage.setItem('cardShape', currentCardShape);
-                renderSearchResults(spotifyResults); // 모양만 다시 렌더링
+                renderSearchResults(spotifyResults);
             });
         });
     }
 
-    // --- 초기화 함수 ---
+    // --- 초기화 ---
     function initialize() {
-        // 저장된 설정 불러오기
-        channelNameInput.value = localStorage.getItem('channelName') || '';
+        channelNameInput.value = channelName;
         playerCover.src = uploadedImage;
 
         const savedBase = localStorage.getItem('playerBaseColor') || '#6a1b9a';
         const savedAccent = localStorage.getItem('playerAccentColor') || '#4a148c';
         document.documentElement.style.setProperty('--player-bg-start', savedBase);
         document.documentElement.style.setProperty('--player-bg-end', savedAccent);
-        baseColorPicker.value = savedBase;
-        accentColorPicker.value = savedAccent;
+        baseColorPicker.value = savedBase; accentColorPicker.value = savedAccent;
 
-        const savedShape = localStorage.getItem('cardShape') || 'default';
-        cardShapeButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.shape === savedShape));
+        cardShapeButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.shape === currentCardShape));
 
-        updatePlayerControls(false); // 처음에는 플레이어 버튼 비활성화
+        updatePlayerControls(false);
         setupEventListeners();
         
-        // 초기 로딩 시 인기 차트 검색
-        searchButton.value = "아이유"; // 예시
+        searchQueryInput.value = "아이유 좋은날";
         searchButton.click();
     }
 
